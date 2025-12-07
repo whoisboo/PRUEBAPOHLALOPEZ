@@ -1,58 +1,72 @@
 package com.example.prueba_pohlalopez;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.widget.*;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class EditarActivity extends AppCompatActivity {
 
-    EditText txtNombre, txtDesc;
-    int codigo;
+    EditText txtNombre, txtApellido, txtEdad;
+    Button btnActualizar, btnEliminar;
+
+    FirebaseFirestore db;
+
+    String id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar);
 
-        txtNombre = findViewById(R.id.editNombre);
-        txtDesc = findViewById(R.id.editDesc);
-        Button btnActualizar = findViewById(R.id.btnActualizar);
+        txtNombre = findViewById(R.id.txtNombre);
+        txtApellido = findViewById(R.id.txtApellido);
+        txtEdad = findViewById(R.id.txtEdad);
+        btnActualizar = findViewById(R.id.btnActualizar);
+        btnEliminar = findViewById(R.id.btnEliminar);
 
-        codigo = getIntent().getIntExtra("CODIGO", 0);
+        db = FirebaseFirestore.getInstance();
 
-        cargarDatos();
+        id = getIntent().getStringExtra("id");
+        txtNombre.setText(getIntent().getStringExtra("nombre"));
+        txtApellido.setText(getIntent().getStringExtra("apellido"));
+        txtEdad.setText(String.valueOf(getIntent().getIntExtra("edad", 0)));
 
         btnActualizar.setOnClickListener(v -> actualizar());
-    }
-
-    private void cargarDatos() {
-        DBHelper db = new DBHelper(this);
-        SQLiteDatabase sql = db.getReadableDatabase();
-
-        Cursor c = sql.rawQuery("SELECT * FROM ESTUDIANTES WHERE CODIGO=" + codigo, null);
-
-        if (c.moveToFirst()) {
-            txtNombre.setText(c.getString(1));
-            txtDesc.setText(c.getString(2));
-        }
-
-        c.close();
+        btnEliminar.setOnClickListener(v -> eliminar());
     }
 
     private void actualizar() {
-        DBHelper db = new DBHelper(this);
-        SQLiteDatabase sql = db.getWritableDatabase();
+        Map<String, Object> alumno = new HashMap<>();
+        alumno.put("nombre", txtNombre.getText().toString());
+        alumno.put("apellido", txtApellido.getText().toString());
+        alumno.put("edad", Integer.parseInt(txtEdad.getText().toString()));
 
-        ContentValues valores = new ContentValues();
-        valores.put("NOMBRE", txtNombre.getText().toString());
-        valores.put("DESCRIPCION", txtDesc.getText().toString());
+        db.collection("alumnos").document(id)
+                .set(alumno)
+                .addOnSuccessListener(aVoid ->
+                        Toast.makeText(this, "Actualizado correctamente", Toast.LENGTH_SHORT).show()
+                )
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
+    }
 
-        sql.update("ESTUDIANTES", valores, "CODIGO=" + codigo, null);
-
-        Toast.makeText(this, "Actualizado!", Toast.LENGTH_SHORT).show();
-        finish();
+    private void eliminar() {
+        db.collection("alumnos").document(id)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Eliminado correctamente", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
     }
 }

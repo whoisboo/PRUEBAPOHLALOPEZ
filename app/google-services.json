@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "852278260506",
+    "project_id": "pruebapohlalopez",
+    "storage_bucket": "pruebapohlalopez.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:852278260506:android:4237cf3965ff06abe0b2a3",
+        "android_client_info": {
+          "package_name": "com.example.prueba_pohlalopez"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4Gl1uPKk5jDULH2aH-VdOheytH33a7ng"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
